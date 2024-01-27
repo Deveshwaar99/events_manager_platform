@@ -9,7 +9,7 @@ export default function Header() {
     <header className=" w-full border-b">
       <div className="wrapper flex justify-between items-center">
         <Link href={'/'} className=" ">
-          <h1 className=" border border-amber-500 border-solid text-3xl font-black">Book-now</h1>
+          <h1 className=" border border-amber-500 border-solid text-3xl font-black">Book.</h1>
         </Link>
 
         <SignedIn>

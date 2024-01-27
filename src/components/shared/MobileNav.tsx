@@ -18,7 +18,7 @@ export default function MobileNav() {
           ></Image>
         </SheetTrigger>
         <SheetContent className="md:hidden bg-white flex flex-col gap-6 ">
-          <h1 className=" text-2xl font-black">Book-now</h1>
+          <h1 className=" text-2xl font-black">Book.</h1>
           <Separator />
           <NavItems />
         </SheetContent>
