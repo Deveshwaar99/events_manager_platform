@@ -11,19 +11,20 @@ export default function Header() {
         <Link href={'/'} className=" ">
           <h1 className=" border border-amber-500 border-solid text-3xl font-black">Book-now</h1>
         </Link>
-        {/* //change to sign in */}
+
         <SignedIn>
           <nav className="hidden md:flex-between w-full max-w-xs  ">
             <NavItems />
           </nav>
         </SignedIn>
+
         <div className=" border border-amber-500 border-solid flex justify-end gap-3">
           <SignedOut>
             <Button asChild className=" rounded-full" size={'lg'}>
               <Link href="/sign-in">Login</Link>
             </Button>
           </SignedOut>
-          {/* //change to sign in */}
+
           <SignedIn>
             <UserButton afterSignOutUrl="/" />
             <span className="md:hidden">
