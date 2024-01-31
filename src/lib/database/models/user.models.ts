@@ -19,6 +19,7 @@ const UserSchema = new Schema({
   firstName: { type: String, required: [true, 'First name is required'] },
   lastName: { type: String, required: [true, 'Last name is required'] },
   photo: { type: String, required: [true, 'Photo is required'] },
+  events: [{ type: Schema.Types.ObjectId, ref: 'Event' }],
 })
 
 const User = models.User || model('User', UserSchema)
