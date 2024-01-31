@@ -1,6 +1,9 @@
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
+import { createUser, updateUser } from '@/lib/database/actions/user.actions'
+import { clerkClient } from '@clerk/nextjs'
+import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the webhook
@@ -46,18 +49,49 @@ export async function POST(req: Request) {
     })
   }
 
-  // Get the ID and type
+  // User Created
   if (evt.type === 'user.created') {
     const { id, email_addresses, first_name, last_name, username, image_url } = evt.data
     const user = {
-      username,
+      username: username!,
       clerkId: id,
-      email: email_addresses,
+      email: email_addresses[0].email_address,
       firstName: first_name,
       lastName: last_name,
       photo: image_url,
     }
+    const newUser = await createUser(user)
+    if (newUser) {
+      await clerkClient.users.updateUserMetadata(id, {
+        publicMetadata: {
+          userId: newUser._id,
+        },
+      })
+    }
+    return NextResponse.json({ message: 'OK', user: newUser })
   }
 
-  return new Response('', { status: 200 })
+  // User Deleted
+  // if (evt.type === 'user.deleted') {
+  //   const { id } = evt.data
+  //   const deletedUser = await deleteUser(id!)
+  //   return NextResponse.json({ message: 'OK', deletedUser })
+  // }
+
+  if (evt.type === 'user.updated') {
+    const { id, image_url, first_name, last_name, username } = evt.data
+
+    const user = {
+      firstName: first_name,
+      lastName: last_name,
+      username: username!,
+      photo: image_url,
+    }
+
+    const updatedUser = await updateUser(id, user)
+
+    return NextResponse.json({ message: 'OK', user: updatedUser })
+  }
+
+  return NextResponse.json({ message: '' }, { status: 200 })
 }
