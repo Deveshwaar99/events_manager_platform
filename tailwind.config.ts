@@ -71,6 +71,7 @@ module.exports = withUt({
       },
       backgroundImage: {
         'dotted-pattern': "url('/assets/images/dotted-pattern.png')",
+        'random-pattern': "url('/assets/images/pattern-randomized.png')",
         'hero-img': "url('/assets/images/hero.png')",
       },
       borderRadius: {
