@@ -58,7 +58,7 @@ export async function POST(req: Request) {
   if (evt.type === 'user.created') {
     const { id, email_addresses, first_name, last_name, username, image_url } = evt.data
     const user = {
-      username: username!,
+      username: username ?? 'Testuser123',
       clerkId: id,
       email: email_addresses[0].email_address,
       firstName: first_name,
