@@ -85,15 +85,15 @@ body {
 /* ========================================== TAILWIND STYLES */
 @layer utilities {
   .wrapper {
-    @apply max-w-7xl lg:mx-auto p-5 md:px-10 xl:px-0 w-full;
+    @apply w-full p-5 max-w-7xl lg:mx-auto md:px-10 xl:px-0;
   }
 
   .flex-center {
-    @apply flex justify-center items-center;
+    @apply flex items-center justify-center;
   }
 
   .flex-between {
-    @apply flex justify-between items-center;
+    @apply flex items-center justify-between;
   }
 
   /* TYPOGRAPHY */
@@ -222,7 +222,7 @@ body {
   }
 
   .select-item {
-    @apply py-3 cursor-pointer  focus:bg-primary-50;
+    @apply py-3 cursor-pointer focus:bg-primary-50;
   }
 
   .toggle-switch {
