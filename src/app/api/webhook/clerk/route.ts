@@ -73,7 +73,7 @@ export async function POST(req: Request) {
         },
       })
     }
-    return NextResponse.json({ message: 'OK', user: newUser })
+    return NextResponse.json({ message: 'OK', user: newUser }, { status: 200 })
   }
 
   // User Deleted
@@ -95,8 +95,8 @@ export async function POST(req: Request) {
 
     const updatedUser = await updateUser(id, user)
 
-    return NextResponse.json({ message: 'OK', user: updatedUser })
+    return NextResponse.json({ message: 'OK', user: updatedUser }, { status: 200 })
   }
 
-  return NextResponse.json({ message: 'Api working successfully' }, { status: 200 })
+  return NextResponse.json({ message: 'Api working successfully', id, eventType }, { status: 200 })
 }
