@@ -13,3 +13,4 @@ export function handleError(error: unknown) {
     throw new Error(JSON.stringify(error))
   }
 }
+export const convertFileToUrl = (file: File) => URL.createObjectURL(file)
