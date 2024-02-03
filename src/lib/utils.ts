@@ -6,7 +6,6 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function handleError(error: unknown) {
-  console.log(error)
   if (typeof error === 'string') {
     throw new Error(error)
   } else {

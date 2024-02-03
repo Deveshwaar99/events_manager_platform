@@ -104,7 +104,7 @@ function EventForm({ id, type }: EventFormProps) {
             control={form.control}
             name="categoryId"
             render={({ field }) => (
-              <FormItem className="w-full border ">
+              <FormItem className="w-full ">
                 <FormControl>
                   <Dropdown value={field.value} onValueChange={field.onChange} />
                 </FormControl>
@@ -281,7 +281,13 @@ function EventForm({ id, type }: EventFormProps) {
             )}
           />
         </div>
-        <Button type="submit">Submit</Button>
+        <Button
+          type="submit"
+          disabled={form.formState.isSubmitting}
+          className="w-full col-span-2 button"
+        >
+          {form.formState.isSubmitting ? 'Submitting...' : 'Submit'}
+        </Button>
       </form>
     </Form>
   )
