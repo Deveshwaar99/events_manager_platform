@@ -1,4 +1,7 @@
 'use client'
+
+import { useState } from 'react'
+
 //ui
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -33,7 +36,18 @@ import calendarImg from '../../../public/assets/icons/calendar.svg'
 import priceImg from '../../../public/assets/icons/dollar.svg'
 import urlImg from '../../../public/assets/icons/link.svg'
 
-import { useState } from 'react'
+//uploadthing
+import { useUploadThing } from '@/lib/uploadthing'
+
+import { createEvent } from '@/lib/database/actions/events.actions'
+import { useRouter } from 'next/navigation'
+import { handleError } from '@/lib/utils'
+
+type EventFormProps = {
+  userId: string
+  type: 'create' | 'update'
+}
+
 const formSchema = z.object({
   title: z
     .string()
@@ -58,9 +72,12 @@ const formSchema = z.object({
   url: z.string(),
 })
 
-function EventForm({ id, type }: EventFormProps) {
+function EventForm({ userId, type }: EventFormProps) {
   //file upload
   const [files, setFiles] = useState<File[]>([])
+  const { startUpload } = useUploadThing('imageUploader')
+
+  const router = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -78,10 +95,30 @@ function EventForm({ id, type }: EventFormProps) {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values)
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    let eventDetails = { ...values }
+    let uploadedImageUrl = values.imageUrl
+
+    //uploading the image
+    if (files.length) {
+      const uploadedImg = await startUpload(files)
+
+      if (!uploadedImg) return
+
+      eventDetails.imageUrl = uploadedImg[0].url
+    }
+    if (type === 'create') {
+      try {
+        const newEvent = await createEvent({ userId, eventDetails })
+        if (newEvent) {
+          form.reset()
+          router.push(`/events/${newEvent._id}`)
+        }
+      } catch (error) {
+        console.log(error)
+        handleError(error)
+      }
+    }
   }
 
   return (
@@ -294,8 +331,3 @@ function EventForm({ id, type }: EventFormProps) {
 }
 
 export default EventForm
-
-type EventFormProps = {
-  id: string
-  type: 'create' | 'update'
-}

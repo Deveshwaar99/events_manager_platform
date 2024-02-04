@@ -19,6 +19,7 @@ export async function addNewCategory(newCategory: string) {
     const addedCategory = await Category.create({ name: newCategory.trim() })
     return JSON.parse(JSON.stringify(addedCategory))
   } catch (error) {
+    console.log(error)
     handleError(error)
   }
 }
