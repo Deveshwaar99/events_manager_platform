@@ -4,6 +4,7 @@ import { handleError } from '@/lib/utils'
 import { connectToDatabase } from '..'
 import User from '../models/user.models'
 import Event from '../models/events.models'
+import Category from '../models/category.models'
 
 type CreateEventParams = {
   userId: string
@@ -22,9 +23,9 @@ type CreateEventParams = {
   //   path: string
 }
 
-function populateEvent(query: any) {
-  return query.populate('organizer', '_id firstName lastName').populate('category', '_id name')
-}
+// function populateEvent(query: any) {
+//   return query.populate('organizer', '_id firstName lastName').populate('category', '_id name')
+// }
 
 export async function createEvent({ userId, eventDetails }: CreateEventParams) {
   try {
@@ -51,7 +52,10 @@ export async function fetchEvent(id: string) {
   try {
     await connectToDatabase()
 
-    const event = await populateEvent(Event.findById(id))
+    const event = await Event.findById(id)
+      .populate({ path: 'organizer', model: User, select: '_id firstName lastName' })
+      .populate({ path: 'category', model: Category, select: '_id name' })
+
     if (!event) throw new Error('Event not found')
 
     return JSON.parse(JSON.stringify(event))
