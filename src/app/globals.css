@@ -85,7 +85,7 @@ body {
 /* ========================================== TAILWIND STYLES */
 @layer utilities {
   .wrapper {
-    @apply w-full p-5 max-w-7xl lg:mx-auto md:px-10 xl:px-0;
+    @apply w-full max-w-7xl p-5 md:px-10 lg:mx-auto xl:px-0;
   }
 
   .flex-center {
@@ -222,7 +222,7 @@ body {
   }
 
   .select-item {
-    @apply py-3 cursor-pointer focus:bg-primary-50;
+    @apply cursor-pointer py-3 focus:bg-primary-50;
   }
 
   .toggle-switch {
