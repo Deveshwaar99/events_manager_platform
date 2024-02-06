@@ -19,7 +19,25 @@ export async function addNewCategory(newCategory: string) {
     const addedCategory = await Category.create({ name: newCategory.trim() })
     return JSON.parse(JSON.stringify(addedCategory))
   } catch (error) {
-    console.log(error)
+    handleError(error)
+  }
+}
+
+export async function getCategoryIdByName(name: string) {
+  try {
+    await connectToDatabase()
+
+    const category = await Category.findOne(
+      {
+        name: { $regex: new RegExp(name, 'i') },
+      },
+      {
+        _id: 1,
+      }
+    )
+
+    return category?._id
+  } catch (error) {
     handleError(error)
   }
 }

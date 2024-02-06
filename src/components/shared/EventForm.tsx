@@ -39,32 +39,35 @@ import urlImg from '../../../public/assets/icons/link.svg'
 //uploadthing
 import { useUploadThing } from '@/lib/uploadthing'
 
-import { createEvent } from '@/lib/database/actions/events.actions'
+import { createEvent, updateEventById } from '@/lib/database/actions/events.actions'
 import { useRouter } from 'next/navigation'
 import { handleError } from '@/lib/utils'
+import { IEvent } from '@/lib/database/models/events.models'
 
 type EventFormProps = {
   userId: string
-  type: 'create' | 'update'
+  eventId: string
+  event?: IEvent
+  type: 'update' | 'create'
 }
 
 const formSchema = z.object({
   title: z
     .string()
     .min(2, 'Title must be at least 2 characters.')
-    .max(15, 'Title must be less than 20 characters'),
+    .max(30, 'Title must be less than 30 characters'),
 
   description: z
     .string()
     .min(2, 'Description must be at least 2 characters.')
-    .max(350, 'Description must be less than 350 characters'),
+    .max(700, 'Description must be less than 700 characters'),
   location: z
     .string()
     .min(3, 'Location must be at least 3 characters.')
-    .max(15, 'Location must be less than 15 characters'),
+    .max(50, 'Location must be less than 50 characters'),
 
-  categoryId: z.string(),
-  imageUrl: z.string(),
+  categoryId: z.string().min(3, 'Category must be selected'),
+  imageUrl: z.string().min(3, 'Image must be added'),
   startDateTime: z.date(),
   endDateTime: z.date(),
   price: z.string(),
@@ -72,7 +75,7 @@ const formSchema = z.object({
   url: z.string(),
 })
 
-function EventForm({ userId, type }: EventFormProps) {
+function EventForm({ userId, eventId, event, type }: EventFormProps) {
   //file upload
   const [files, setFiles] = useState<File[]>([])
   const { startUpload } = useUploadThing('imageUploader')
@@ -81,18 +84,25 @@ function EventForm({ userId, type }: EventFormProps) {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: '',
-      description: '',
-      location: '',
-      categoryId: '',
-      imageUrl: '',
-      startDateTime: new Date(),
-      endDateTime: new Date(),
-      price: '',
-      isFree: false,
-      url: '',
-    },
+    defaultValues: event
+      ? {
+          ...event,
+          categoryId: event.category._id,
+          startDateTime: new Date(event.startDateTime),
+          endDateTime: new Date(event.endDateTime),
+        }
+      : {
+          title: '',
+          description: '',
+          location: '',
+          categoryId: '',
+          imageUrl: '',
+          startDateTime: new Date(),
+          endDateTime: new Date(),
+          price: '',
+          isFree: false,
+          url: '',
+        },
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -115,7 +125,19 @@ function EventForm({ userId, type }: EventFormProps) {
           router.push(`/events/${newEvent._id}`)
         }
       } catch (error) {
-        console.log(error)
+        handleError(error)
+      }
+    }
+
+    if (type === 'update') {
+      if (!eventId) return router.back()
+      try {
+        const updatedEvent = await updateEventById({ eventId, userId, eventDetails })
+        if (updatedEvent) {
+          form.reset()
+          router.push(`/events/${updatedEvent._id}`)
+        }
+      } catch (error) {
         handleError(error)
       }
     }
@@ -124,7 +146,7 @@ function EventForm({ userId, type }: EventFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5">
-        <div className="flex flex-col gap-5 md:flex-row">
+        <div className="flex flex-col md:flex-row gap-5">
           <FormField
             control={form.control}
             name="title"
@@ -151,14 +173,14 @@ function EventForm({ userId, type }: EventFormProps) {
           />
         </div>
 
-        <div className="flex flex-col gap-5 md:flex-row">
+        <div className="flex flex-col md:flex-row gap-5">
           <FormField
             control={form.control}
             name="description"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormControl className=" h-72">
-                  <Textarea placeholder="Description" className="textarea rounded-2xl" {...field} />
+                <FormControl className="h-72 ">
+                  <Textarea placeholder="Description" className="rounded-2xl textarea" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -182,14 +204,14 @@ function EventForm({ userId, type }: EventFormProps) {
           />
         </div>
 
-        <div className="flex flex-col gap-5 md:flex-row">
+        <div className="flex flex-col md:flex-row gap-5">
           <FormField
             control={form.control}
             name="location"
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormControl>
-                  <div className="flex-center h-[54px] w-full overflow-hidden rounded-full bg-grey-50 px-4 py-2">
+                  <div className="flex-center bg-grey-50 px-4 py-2 rounded-full w-full h-[54px] overflow-hidden">
                     <Image src={locationImg} alt="location" width={24} height={24} />
                     <Input
                       placeholder="Event location or Online"
@@ -204,16 +226,16 @@ function EventForm({ userId, type }: EventFormProps) {
           />
         </div>
 
-        <div className="flex flex-col gap-5 md:flex-row">
+        <div className="flex flex-col md:flex-row gap-5">
           <FormField
             control={form.control}
             name="startDateTime"
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormControl>
-                  <div className="flex justify-start items-center h-[54px] w-full overflow-hidden rounded-full bg-grey-50 px-4 py-2">
+                  <div className="flex items-center justify-start bg-grey-50 px-4 py-2 rounded-full w-full h-[54px] overflow-hidden">
                     <Image src={calendarImg} alt="calendar" width={24} height={24} />
-                    <p className="ml-3 whitespace-nowrap text-grey-600">Start Date</p>
+                    <p className="ml-3 text-grey-600 whitespace-nowrap">Start Date</p>
                     <DatePicker
                       className="w-100"
                       selected={field.value}
@@ -236,9 +258,9 @@ function EventForm({ userId, type }: EventFormProps) {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormControl>
-                  <div className=" flex justify-start items-center h-[54px] w-full overflow-hidden rounded-full bg-grey-50 px-4 py-2">
+                  <div className="flex items-center justify-start bg-grey-50 px-4 py-2 rounded-full w-full h-[54px] overflow-hidden ">
                     <Image src={calendarImg} alt="calendar" width={24} height={24} />
-                    <p className="ml-3 whitespace-nowrap text-grey-600">End Date</p>
+                    <p className="ml-3 text-grey-600 whitespace-nowrap">End Date</p>
                     <DatePicker
                       className="w-100"
                       selected={field.value}
@@ -257,20 +279,20 @@ function EventForm({ userId, type }: EventFormProps) {
           />
         </div>
 
-        <div className="flex flex-col gap-5 md:flex-row">
+        <div className="flex flex-col md:flex-row gap-5">
           <FormField
             control={form.control}
             name="price"
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormControl>
-                  <div className="flex-center h-[54px] w-full overflow-hidden rounded-full bg-grey-50 px-4 py-2">
+                  <div className="flex-center bg-grey-50 px-4 py-2 rounded-full w-full h-[54px] overflow-hidden">
                     <Image src={priceImg} alt="price" width={24} height={24} />
                     <Input
                       type="number"
                       placeholder="Price"
                       {...field}
-                      className="border-0 p-regular-16 bg-grey-50 outline-offset-0 focus:border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                      className="bg-grey-50 p-regular-16 border-0 focus:border-0 outline-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                     />
                     <FormField
                       control={form.control}
@@ -278,10 +300,10 @@ function EventForm({ userId, type }: EventFormProps) {
                       render={({ field }) => (
                         <FormItem className="w-full">
                           <FormControl>
-                            <div className="gap-2 flex-center">
+                            <div className="flex-center gap-2">
                               <label
                                 htmlFor="isFree"
-                                className="pr-3 leading-none whitespace-nowrap peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                className="peer-disabled:opacity-70 pr-3 leading-none whitespace-nowrap peer-disabled:cursor-not-allowed"
                               >
                                 Free Entry
                               </label>
@@ -308,7 +330,7 @@ function EventForm({ userId, type }: EventFormProps) {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormControl>
-                  <div className="flex-center h-[54px] w-full overflow-hidden rounded-full bg-grey-50 px-4 py-2">
+                  <div className="flex-center bg-grey-50 px-4 py-2 rounded-full w-full h-[54px] overflow-hidden">
                     <Image src={urlImg} alt="url" width={24} height={24} />
                     <Input placeholder="Url" {...field} className="input-field" />
                   </div>
@@ -321,9 +343,11 @@ function EventForm({ userId, type }: EventFormProps) {
         <Button
           type="submit"
           disabled={form.formState.isSubmitting}
-          className="w-full col-span-2 button"
+          className="col-span-2 w-full button"
         >
-          {form.formState.isSubmitting ? 'Submitting...' : 'Submit'}
+          {' '}
+          {type === 'create' && (form.formState.isSubmitting ? 'Submitting...' : 'Submit')}
+          {type === 'update' && (form.formState.isSubmitting ? 'Updating...' : 'Update Event')}
         </Button>
       </form>
     </Form>

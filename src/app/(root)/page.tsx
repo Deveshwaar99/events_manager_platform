@@ -3,13 +3,26 @@ import Link from 'next/link'
 import Image from 'next/image'
 
 import heroImg from '../../../public/assets/images/hero1.png'
+import EventsCollection from '@/components/shared/EventsCollection'
+import Card from '@/components/shared/Card'
+import { fetchAllEvents } from '@/lib/database/actions/events.actions'
 
-export default function Home() {
+export default async function Home({ searchParams }: any) {
+  const page = Number(searchParams?.page) || 1
+  const searchText = (searchParams?.query as string) || ''
+  const category = (searchParams?.category as string) || ''
+
+  const events = await fetchAllEvents({
+    query: searchText,
+    category,
+    page,
+    limit: 6,
+  })
   return (
     <>
-      <section className="py-5 bg-contain bg-primary-50 bg-random-pattern md:py-10">
-        <div className="grid grid-cols-1 gap-5 wrapper md:grid-cols-2 2xl:gap-0">
-          <div className="flex flex-col justify-center gap-8">
+      <section className="bg-primary-50 bg-random-pattern bg-contain py-5 md:py-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 2xl:gap-0 wrapper">
+          <div className="flex flex-col justify-center gap-4">
             <h1 className="h1-bold">
               Elevate Your Events, Connect Effortlessly, Celebrate Uniquely: Our Platform, Your
               Experience!
@@ -18,7 +31,7 @@ export default function Home() {
               Tap into 3.5K+ mentors across top companies. Elevate learning in our vibrant global
               community. Wisdom, connections, and innovation await.
             </p>
-            <Button size="lg" asChild className="w-full button md:w-fit">
+            <Button size="lg" asChild className="w-full md:w-fit button">
               <Link href="#events">Explore Now</Link>
             </Button>
           </div>
@@ -28,16 +41,25 @@ export default function Home() {
             alt="hero"
             width={1200}
             height={1200}
-            className="max-h-[70vh] object-contain object-center 2xl:max-h-[50vh]"
+            className="max-h-[70vh] 2xl:max-h-[50vh] object-center object-contain"
           />
         </div>
       </section>
 
-      <section className="flex flex-col gap-8 my-8 wrapper md:gap-12 ">
+      <section className="flex flex-col gap-8 md:gap-12 my-8 wrapper">
         <h2>
           Trusted by <br />
           Thousands of Events
         </h2>
+        <EventsCollection
+          data={events?.data}
+          emptyTitle="No Events Found"
+          emptyStateSubtext="Come back later"
+          collectionType="All_Events"
+          limit={6}
+          page={page}
+          totalPages={events?.pageCount}
+        />
       </section>
     </>
   )
