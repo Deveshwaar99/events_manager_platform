@@ -15,7 +15,7 @@ export default async function UpdateEvent(context: { params: { id: string } }) {
   return (
     <>
       <section className="bg-dotted-pattern bg-primary-50 bg-cover bg-center py-5 md:py-10">
-        <h3 className="text-left md:text-center h3-bold wrapper">Create Event</h3>
+        <h3 className="text-left md:text-center h3-bold wrapper">Edit Event</h3>
       </section>
       <div className="my-8 wrapper">
         <EventForm userId={userId} eventId={eventId} event={event} type="update" />
