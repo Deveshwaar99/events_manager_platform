@@ -5,6 +5,7 @@ const stripe = new Stripe(process.env.STRIPE_WEBHOOK_SECRET!)
 
 export async function POST(request: Request) {
   const body = await request.json()
+
   const sig = request.headers.get('stripe-signature') as string
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
   let event
@@ -17,7 +18,8 @@ export async function POST(request: Request) {
   }
 
   // Handle the event
-  switch (event.type) {
+
+  switch (event?.type) {
     case 'checkout.session.completed':
       const { id, amount_total, metadata } = event.data.object
 
