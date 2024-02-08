@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 const stripe = new Stripe(process.env.STRIPE_WEBHOOK_SECRET!)
 
-export default async function POST(request: Request) {
+export async function POST(request: Request) {
   const body = await request.json()
   const sig = request.headers.get('stripe-signature') as string
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
