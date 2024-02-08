@@ -10,21 +10,16 @@ export async function POST(request: Request) {
   let event
 
   try {
-    console.log({ sig, endpointSecret })
     event = stripe.webhooks.constructEvent(body, sig, endpointSecret)
-    console.log('Event recieved', event)
   } catch (err) {
-    console.log('error in catch')
     NextResponse.json({ message: 'Webhook error', error: err }, { status: 400 })
     return
   }
 
   // Handle the event
-  console.log('A')
   switch (event?.type) {
     case 'checkout.session.completed':
       const { id, amount_total, metadata } = event.data.object
-      console.log('B')
       const order = {
         stripeId: id,
         eventId: metadata?.eventId || '',
@@ -32,7 +27,6 @@ export async function POST(request: Request) {
         totalAmount: amount_total ? (amount_total / 100).toString() : '0',
         createdAt: new Date(),
       }
-      console.log('C')
       const newOrder = await createOrder(order)
       return NextResponse.json({ message: 'OK', order: newOrder })
       break
