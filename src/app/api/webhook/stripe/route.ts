@@ -10,6 +10,7 @@ export async function POST(request: Request) {
   let event
 
   try {
+    console.log(sig, endpointSecret)
     event = stripe.webhooks.constructEvent(body, sig, endpointSecret)
     console.log('Event recieved', event)
   } catch (err) {
