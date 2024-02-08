@@ -33,7 +33,7 @@ export async function checkoutOrder(order: CheckoutOrderParams) {
           quantity: 1,
         },
       ],
-      metadata: { eventId: order.eventId, buyerId: order.buyerId },
+      metadata: { eventId: order.eventId, buyerId: order.buyerId, name: 'devesh' },
       mode: 'payment',
       success_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/profile`,
       cancel_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/`,
