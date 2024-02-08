@@ -46,9 +46,9 @@ import { IEvent } from '@/lib/database/models/events.models'
 
 type EventFormProps = {
   userId: string
-  eventId: string
-  event?: IEvent
   type: 'update' | 'create'
+  eventId?: string
+  event?: IEvent
 }
 
 const formSchema = z.object({
