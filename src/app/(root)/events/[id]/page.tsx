@@ -1,17 +1,35 @@
-import { fetchEventbyId } from '@/lib/database/actions/events.actions'
+import {
+  fetchAllEvents,
+  fetchEventbyId,
+  getRelatedEventsByCategory,
+} from '@/lib/database/actions/events.actions'
 import Image from 'next/image'
 import calendarImg from '../../../../../public/assets/icons/calendar.svg'
 import locationImg from '../../../../../public/assets/icons/location.svg'
 
 //test
-import test from './test.jpg'
-import { formatDateTime } from '@/lib/utils'
 
-export default async function EventDetails(context: { params: { id: string } }) {
-  const { params } = context
-  const eventId = params.id
+import { formatDateTime } from '@/lib/utils'
+import { IEvent } from '@/lib/database/models/events.models'
+import EventsCollection from '@/components/shared/EventsCollection'
+import CheckoutButton from '@/components/shared/CheckoutButton'
+
+type SearchParamProps = {
+  params: { id: string }
+  searchParams: { [key: string]: string | string[] | undefined }
+}
+
+export default async function EventDetails(context: SearchParamProps) {
+  const eventId = context.params.id
+  const page = Number(context.searchParams.page) | 1
 
   const event = await fetchEventbyId(eventId)
+  const relatedEvents = await getRelatedEventsByCategory({
+    categoryId: event.category._id,
+    eventId: event._id,
+    page,
+    limit: 3,
+  })
 
   return (
     <>
@@ -48,7 +66,7 @@ export default async function EventDetails(context: { params: { id: string } }) 
               </div>
             </div>
 
-            {/* <CheckoutButton event={event} /> */}
+            <CheckoutButton event={event} />
 
             <div className="flex flex-col gap-5">
               <div className="flex gap-2 md:gap-3">
@@ -82,19 +100,19 @@ export default async function EventDetails(context: { params: { id: string } }) 
         </div>
       </section>
 
-      {/* EVENTS with the same category */}
+      {/* Related EVENTS */}
       <section className="flex flex-col gap-8 md:gap-12 my-8 wrapper">
         <h2 className="h2-bold">Related Events</h2>
 
-        {/* <Collection
+        <EventsCollection
           data={relatedEvents?.data}
           emptyTitle="No Events Found"
           emptyStateSubtext="Come back later"
           collectionType="All_Events"
           limit={3}
-          page={searchParams.page as string}
+          page={page}
           totalPages={relatedEvents?.totalPages}
-        /> */}
+        />
       </section>
     </>
   )

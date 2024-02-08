@@ -53,6 +53,19 @@ type DeleteEventParams = {
   path: string
 }
 
+type GetRelatedEventsByCategoryParams = {
+  categoryId: string
+  eventId: string
+  limit: number
+  page: number
+}
+
+type FetchEventsByOrganizerParams = {
+  userId: string
+  page: number
+  limit: number
+}
+
 // function populateEvent(query: any) {
 //   return query.populate('organizer', '_id firstName lastName').populate('category', '_id name')
 // }
@@ -79,6 +92,8 @@ export async function createEvent({ userId, eventDetails }: CreateEventParams) {
 }
 
 //FETCH
+
+//FETCH SINGLE EVENT
 export async function fetchEventbyId(id: string) {
   try {
     await connectToDatabase()
@@ -95,7 +110,7 @@ export async function fetchEventbyId(id: string) {
   }
 }
 
-//FETCH
+//FETCH ALL EVENTS
 export async function fetchAllEvents({ query, category, page, limit }: QueryParams) {
   try {
     await connectToDatabase()
@@ -122,20 +137,64 @@ export async function fetchAllEvents({ query, category, page, limit }: QueryPara
   }
 }
 
-//DELETE
-export async function deleteEventbyId({ eventId, path = '/' }: DeleteEventParams) {
+//FETCH RELATED EVENTS BASED ON CATEGORY
+export async function getRelatedEventsByCategory({
+  categoryId,
+  eventId,
+  limit = 3,
+  page = 1,
+}: GetRelatedEventsByCategoryParams) {
   try {
     await connectToDatabase()
 
-    const deletedEvent = await Event.findByIdAndDelete(eventId)
-    if (deletedEvent) revalidatePath(path)
+    const conditions = { $and: [{ category: categoryId }, { _id: { $ne: eventId } }] }
+    const skipAmount = (Number(page) - 1) * limit
 
-    if (!deletedEvent) throw new Error('Event not found')
+    const relatedEvents = await Event.find(conditions)
+      .sort({ createdAt: 'desc' })
+      .skip(skipAmount)
+      .limit(limit)
+      .populate({ path: 'organizer', model: User, select: '_id firstName lastName' })
+      .populate({ path: 'category', model: Category, select: '_id name' })
+    const eventsCount = await Event.countDocuments(conditions)
+
+    return {
+      data: JSON.parse(JSON.stringify(relatedEvents)),
+      totalPages: Math.ceil(eventsCount / limit),
+    }
   } catch (error) {
     handleError(error)
   }
 }
 
+//FETCH EVENTS BASED ON ORGANIZER
+export async function fetchEventByOrganizer({
+  userId,
+  page,
+  limit = 6,
+}: FetchEventsByOrganizerParams) {
+  try {
+    await connectToDatabase()
+    const skip = (Number(page) - 1) * limit
+
+    const organizedEvents = await Event.find({ organizer: userId })
+      .populate({ path: 'organizer', model: User, select: '_id firstName lastName' })
+      .populate({ path: 'category', model: Category, select: '_id name' })
+      .sort({ createdAt: 'desc' })
+      .skip(skip)
+      .limit(limit)
+
+    const eventCount = await Event.countDocuments({ organizer: userId })
+    return {
+      data: JSON.parse(JSON.stringify(organizedEvents)),
+      totalPages: Math.ceil(eventCount / limit),
+    }
+  } catch (error) {
+    handleError(error)
+  }
+}
+
+//UPDATE SINGLE EVENT
 export async function updateEventById({ userId, eventId, eventDetails }: UpdateEventParams) {
   try {
     await connectToDatabase()
@@ -147,6 +206,20 @@ export async function updateEventById({ userId, eventId, eventDetails }: UpdateE
     if (!updatedEvent) throw new Error('Unable to update event')
 
     return JSON.parse(JSON.stringify(updatedEvent))
+  } catch (error) {
+    handleError(error)
+  }
+}
+
+//DELETE SINGLE EVENT
+export async function deleteEventbyId({ eventId, path = '/' }: DeleteEventParams) {
+  try {
+    await connectToDatabase()
+
+    const deletedEvent = await Event.findByIdAndDelete(eventId)
+    if (deletedEvent) revalidatePath(path)
+
+    if (!deletedEvent) throw new Error('Event not found')
   } catch (error) {
     handleError(error)
   }
