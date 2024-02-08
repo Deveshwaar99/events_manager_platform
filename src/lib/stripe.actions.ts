@@ -3,6 +3,7 @@
 import Stripe from 'stripe'
 import { handleError } from './utils'
 import { redirect } from 'next/navigation'
+import { error } from 'console'
 
 type CheckoutOrderParams = {
   buyerId: string
@@ -39,7 +40,7 @@ export async function checkoutOrder(order: CheckoutOrderParams) {
     })
 
     redirect(session.url!)
-  } catch (err) {
-    handleError(err)
+  } catch (error) {
+    throw error
   }
 }
