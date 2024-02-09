@@ -8,6 +8,14 @@ export interface IOrder extends Document {
   eventId: string
   buyerId: string
 }
+export type IOrderItem = {
+  _id: string
+  totalAmount: string
+  createdAt: Date
+  eventTitle: string
+  eventId: string
+  buyer: string
+}
 
 const OrderSchema = new Schema({
   createdAt: {

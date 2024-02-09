@@ -115,7 +115,7 @@ export async function fetchAllEvents({ query, category, page, limit }: QueryPara
   try {
     await connectToDatabase()
     const titleQuery = query ? { title: { $regex: new RegExp(query, 'i') } } : {}
-    const categoryQuery = category ? await getCategoryIdByName(category) : {}
+    const categoryQuery = category ? { category: await getCategoryIdByName(category) } : {}
 
     const combinedConditions = { ...titleQuery, ...categoryQuery }
     const skipVal = (page - 1) * limit

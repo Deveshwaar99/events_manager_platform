@@ -3,6 +3,7 @@
 import { handleError } from '@/lib/utils'
 import { connectToDatabase } from '..'
 import Category from '../models/category.models'
+
 export async function fetchCategories() {
   try {
     await connectToDatabase()

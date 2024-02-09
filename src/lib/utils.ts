@@ -1,6 +1,8 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
+import qs from 'query-string'
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -50,4 +52,58 @@ export const formatDateTime = (dateString: string) => {
     dateOnly: formattedDate,
     timeOnly: formattedTime,
   }
+}
+
+export const formatPrice = (price: string) => {
+  const amount = parseFloat(price)
+  const formattedPrice = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(amount)
+
+  return formattedPrice
+}
+
+export function formUrlQuery({
+  params,
+  key,
+  value,
+}: {
+  params: string
+  key: string
+  value: string
+}) {
+  const currentUrl = qs.parse(params)
+  console.log(currentUrl)
+  currentUrl[key] = value
+
+  return qs.stringifyUrl(
+    {
+      url: window.location.pathname,
+      query: currentUrl,
+    },
+    { skipNull: true }
+  )
+}
+
+export function removeKeysFromQuery({
+  params,
+  keysToRemove,
+}: {
+  params: string
+  keysToRemove: string[]
+}) {
+  const currentUrl = qs.parse(params)
+
+  keysToRemove.forEach(key => {
+    delete currentUrl[key]
+  })
+
+  return qs.stringifyUrl(
+    {
+      url: window.location.pathname,
+      query: currentUrl,
+    },
+    { skipNull: true }
+  )
 }
