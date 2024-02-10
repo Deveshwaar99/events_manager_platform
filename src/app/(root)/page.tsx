@@ -55,7 +55,7 @@ export default async function Home({ searchParams }: any) {
           Thousands of Events
         </h2>
 
-        <div className="flex w-full flex-col gap-5 md:flex-row">
+        <div id="events" className="flex w-full flex-col gap-5 md:flex-row">
           <Search />
           <CategoryFilter />
         </div>
