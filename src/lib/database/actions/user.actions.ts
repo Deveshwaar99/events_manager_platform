@@ -7,6 +7,8 @@ import User from '../models/user.models'
 import Event from '../models/events.models'
 
 import { NextResponse } from 'next/server'
+import Order from '../models/order.models'
+import { revalidatePath } from 'next/cache'
 
 export type CreateUserParams = {
   clerkId: string
@@ -46,18 +48,7 @@ export async function getUserById(id: string) {
     handleError(error)
   }
 }
-// export async function deleteUser(clerkId: string) {
-//   try {
-//     await connectToDatabase()
-//     const user = await User.findOne({ clerkId })
-//     if (!user) {
-//       throw new Error('User not found')
-//     }
-//     await Event.updateMany({ _id: { $in: user.events } },{$pull:})
-//   } catch (error) {
-//     handleError(error)
-//   }
-// }
+
 export async function updateUser(clerkId: string, updateProperties: UserUpdateProperties) {
   try {
     let updatedUser = await User.findOneAndUpdate({ clerkId }, updateProperties, { new: true })
@@ -65,6 +56,41 @@ export async function updateUser(clerkId: string, updateProperties: UserUpdatePr
       throw new Error('User not found')
     }
     return JSON.parse(JSON.stringify(updatedUser))
+  } catch (error) {
+    handleError(error)
+  }
+}
+
+//Delete User and remove organized events
+
+export async function deleteUser(clerkId: string) {
+  try {
+    await connectToDatabase()
+
+    // Find user to delete
+    const userToDelete = await User.findOne({ clerkId })
+
+    if (!userToDelete) {
+      throw new Error('User not found')
+    }
+
+    // Unlink relationships
+    await Promise.all([
+      // Update the 'events' collection to remove references to the user
+      Event.updateMany(
+        { _id: { $in: userToDelete.events } },
+        { $pull: { organizer: userToDelete._id } }
+      ),
+
+      // Update the 'orders' collection to remove references to the user
+      Order.updateMany({ _id: { $in: userToDelete.orders } }, { $unset: { buyerId: 1 } }),
+    ])
+
+    // Delete user
+    const deletedUser = await User.findByIdAndDelete(userToDelete._id)
+    revalidatePath('/')
+
+    return deletedUser ? JSON.parse(JSON.stringify(deletedUser)) : null
   } catch (error) {
     handleError(error)
   }

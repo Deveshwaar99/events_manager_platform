@@ -1,4 +1,4 @@
-import { createUser, updateUser } from '@/lib/database/actions/user.actions'
+import { createUser, deleteUser, updateUser } from '@/lib/database/actions/user.actions'
 import { clerkClient } from '@clerk/nextjs'
 import { NextResponse } from 'next/server'
 
@@ -76,13 +76,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: 'OK', user: newUser }, { status: 200 })
   }
 
-  // User Deleted
-  // if (evt.type === 'user.deleted') {
-  //   const { id } = evt.data
-  //   const deletedUser = await deleteUser(id!)
-  //   return NextResponse.json({ message: 'OK', deletedUser })
-  // }
-
   if (evt.type === 'user.updated') {
     const { id, image_url, first_name, last_name, username } = evt.data
 
@@ -96,6 +89,14 @@ export async function POST(req: Request) {
     const updatedUser = await updateUser(id, user)
 
     return NextResponse.json({ message: 'OK', user: updatedUser }, { status: 200 })
+  }
+
+  if (eventType === 'user.deleted') {
+    const { id } = evt.data
+
+    const deletedUser = await deleteUser(id!)
+
+    return NextResponse.json({ message: 'OK', user: deletedUser })
   }
 
   return NextResponse.json({ message: 'Api working successfully', id, eventType }, { status: 200 })
