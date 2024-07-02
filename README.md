@@ -2,7 +2,7 @@
 
 <p align="center"><img src="https://socialify.git.ci/Deveshwaar99/events_manager_platform/image?font=Jost&amp;language=1&amp;name=1&amp;owner=1&amp;pattern=Circuit%20Board&amp;theme=Light" alt="project-image"></p>
 
-<p id="description">Eventify is your one-stop solution for managing and attending events effortlessly. With intuitive features for event creation discovery and ticket booking Eventify simplifies the event experience. Join now and take the hassle out of event planning and participation!</p>
+<p id="description">Book. is your one-stop solution for managing and attending events effortlessly. With intuitive features for event creation discovery and ticket booking Eventify simplifies the event experience. Join now and take the hassle out of event planning and participation!</p>
 
 <h2>🚀 Demo</h2>
 
